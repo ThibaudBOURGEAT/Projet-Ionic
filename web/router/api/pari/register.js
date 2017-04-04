@@ -3,13 +3,13 @@ var Pari = require('../../../../models/Pari');
 var User = require('../../../../models/User');
 var passport =require('passport');
 
-router.get('/', function(req, res) {
+router.get('/', passport.authenticate('jwt', {session: false}), function(req, res) {
     Pari.find({}).then(function(paris) {
         res.json(paris);
     });
 });
 
-router.get('/display', function(req, res) {
+router.get('/display', passport.authenticate('jwt', {session: false}), function(req, res) {
     Pari.find({}).sort({id: -1}).limit(3).then(function(paris) {
 		res.json(paris);
     });
@@ -50,10 +50,5 @@ router.post('/edit/:id', passport.authenticate('jwt', {session: false}), functio
     });
     }else{res.status(401).json({message: "Vous ne pouvez pas faire cela car vous n'êtes pas un admin."})}
 });
-
-/*router.delete('/delete/:id',function(req,res){
-    Pari.find({id : req.params.id}).remove({});
-    res.json("Le pari est supprimé");
-});*/
 
 module.exports = router;

@@ -1,17 +1,26 @@
 var router = require('express').Router();
 var User = require('../../../../models/User');
 var hash = require('../../../../helpers/hash');
+var passport =require('passport');
 
-router.get('/', function(req, res) {
-    User.find({}).then(function(users) {
-        res.json(users);
-    });
+router.get('/', passport.authenticate('jwt', {session: false}), function(req, res) {
+    if(req.user.admin) {
+        User.find({}).then(function(users) {
+            res.json(users);
+        });
+    }
+});
+
+router.post('/id_steam', passport.authenticate('jwt', {session: false}), function(req, res){
+    var id_steam = req.body.id_steam;
+    User.findOne({username: req.user.username}).update({$set: {id_steam: id_steam}});
 });
 
 router.post('/', function(req, res) {
     var username = req.body.username;
     var email = req.body.email;
     var password = req.body.password;
+    var id_steam = req.body.id_steam;
     var admin = req.body.admin;
     var del = req.body.del;
 
@@ -24,6 +33,7 @@ router.post('/', function(req, res) {
             username: username,
             email: email,
             password: hash.hashPassword(password),
+            id_steam: id_steam,
             admin: admin,
             del: del
         });
@@ -37,7 +47,7 @@ router.post('/', function(req, res) {
                     }
                 }
                 newUser.save(function(err){
-                    res.json({success: true, message: 'Votre comptre a bien été créé.'})
+                    res.json({success: true, message: 'Votre comptre a bien été créé.'});
                 });
         });
     }

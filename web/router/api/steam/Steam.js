@@ -1,8 +1,10 @@
 var http = require('http');
 var router = require('express').Router();
+var User = require('../../../../models/User');
+var passport =require('passport');
 
-function getAccount(id, callback) {
-	var request = http.get("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?format=json&key=75B7029F7E2BE1CDCD463FE803416AB3&steamids=" + id,
+router.get('/getAccount', passport.authenticate('jwt', {session: false}), function(req, res) {
+	var request = http.get("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?format=json&key=75B7029F7E2BE1CDCD463FE803416AB3&steamids=" + req.user.id_steam,
 	function(reponse){
 	
 		var body = "";	
@@ -15,24 +17,21 @@ function getAccount(id, callback) {
 		if(reponse.statusCode === 200){
 			try{
 				var info = JSON.parse(body);
-				console.log(info.response.players[0].personaname);
-				callback(info);
+				return res.json(info);
 			}catch(error){
-				console.log(error);
+				return res.status(401).json({ message: "Impossible de recuperer les informations"});
 			}
 		}else{
-				console.log({ message: "Impossible de recuperer les informations"});
+				return res.status(401).json({ message: "Impossible de recuperer les informations"});
 			}
 		});
 	});
-}
-
-getAccount('76561197997737990', function(resultat){
-	console.log(resultat.response.players[0].steamid);
 });
+
  
- getStats = function (id) {
-	var request = http.get("http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=75B7029F7E2BE1CDCD463FE803416AB3&steamid=" + id, function(reponse){
+router.get('/getStatCSGO', passport.authenticate('jwt', {session: false}), function(req, res) {
+	var request = http.get("http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=75B7029F7E2BE1CDCD463FE803416AB3&steamid=76561197997737990" + req.user.id_steam,
+	 function(reponse){
 	
 		var body = "";	
 
@@ -44,18 +43,16 @@ getAccount('76561197997737990', function(resultat){
 
 		if(reponse.statusCode === 200){
 			try{
-				var test = JSON.parse(body);
-				console.log(test.playerstats.stats[0]);	
+				var info = JSON.parse(body);
+				return res.json(info);
 			}catch(error){
-				console.log(error);
+				return res.status(401).json({ message: "Impossible de recuperer les informations"});
 			}
 		}else{
-				console.log({ message: "Impossible de recuperer les informations"});
+				return res.status(401).json({ message: "Impossible de recuperer les informations"});
 			}
 		});
 	});
-}
-
-getStats('76561197997737990');
+});
 
 module.exports = router;

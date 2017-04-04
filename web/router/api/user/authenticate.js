@@ -17,7 +17,7 @@ var strategy = new JwtStrategy(jwtOptions, function(jwt_payload, next) {
 
     User.findOne({_id: jwt_payload.id}, function(err, user) {
         if (! user) {
-            res.status(401).json({message:"error, id not found"});
+            res.status(401).json({message:"Utilisateur non trouvé"});
         }
         if (user) {
             next(null, user);
