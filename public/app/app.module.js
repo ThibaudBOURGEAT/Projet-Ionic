@@ -3,9 +3,6 @@ angular.module('app', [])
         $scope.users = [];
 
         $scope.register = function() {
-            /*$scope.users.push($scope.user);
-            $scope.user = {};*/
-
             $http({
                 method: 'POST',
                 url: '/api/user/register',

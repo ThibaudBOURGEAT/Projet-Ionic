@@ -38,22 +38,25 @@ router.use(bodyParser.urlencoded({
 router.post("/", function(req, res) {
   User.findOne({username: req.body.username}, function(err, user) {
     if (!user) {
-        return res.status(401).json({message:"Utilisateur non trouvé"});
+        return res.json({success: false,message:"Utilisateur non trouvé"});
     }
 
-   if (hash.hashPassword(req.body.password) == user.password) {
+    if(req.body.password)
+    {
+    if (hash.hashPassword(req.body.password) == user.password) {
           if (!user.del) {
               var payload = {id: user.id};
               var token = jwt.sign(payload, jwtOptions.secretOrKey);
-              res.json({message: "Vous êtes connecté.", token: token});
+              res.json({success: true,message: "Vous êtes connecté.", token: token});
           }
           else {
-              res.status(401).json({message:"Mauvais compte."});
+              res.json({success: false,message:"Mauvais compte."});
           }
       }
       else {
-          res.status(401).json({message:"Mauvais mot de passe."});
+          res.json({success: false,message:"Mauvais mot de passe."});
       }
+    }else{res.json({success: false, message:"Entrez un mot de passe."})}
   });
 
 });

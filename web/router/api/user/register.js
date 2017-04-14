@@ -11,9 +11,53 @@ router.get('/', passport.authenticate('jwt', {session: false}), function(req, re
     }
 });
 
+router.get('/infoAccount', passport.authenticate('jwt', {session: false}), function(req, res){
+    res.json(req.user);
+});
+
 router.post('/id_steam', passport.authenticate('jwt', {session: false}), function(req, res){
-    var id_steam = req.body.id_steam;
-    User.findOne({username: req.user.username}).update({$set: {id_steam: id_steam}});
+    User.find({username: req.user.username}).update({$set: {id_steam: req.body.id_steam}}).then(function(user) {
+        res.json(user);
+    });
+});
+
+router.post('/username', passport.authenticate('jwt', {session: false}), function(req, res){
+    var username = req.body.username;
+    User.find({}).then(function(users) {
+                for(user in users)
+                {
+                    if(users[user].username == username){
+                        return res.json({ success: false,
+                        message: 'Le nom d\'utilisateur n\'est pas disponnible.'});
+                    }
+                }
+                User.find({username: req.user.username}).update({$set: {username: req.body.username}}).then(function(user) {
+                    res.json(user);
+                });
+        });
+});
+
+router.post('/email', passport.authenticate('jwt', {session: false}), function(req, res){
+    var email = req.body.email;
+    User.find({}).then(function(users) {
+                for(user in users)
+                {
+                    if(users[user].email == email){
+                        return res.json({ success: false,
+                        message: 'L\'email n\'est pas disponnible.'});
+                    }
+                }
+                User.find({username: req.user.username}).update({$set: {email: req.body.email}}).then(function(user) {
+                    res.json(user);
+                });
+        });
+});
+
+router.post('/password', passport.authenticate('jwt', {session: false}), function(req, res){
+    var password = hash.hashPassword(req.body.password); 
+    User.find({username: req.user.username}).update({$set: {password: password}}).then(function(user) {
+        res.json(user);
+    });
 });
 
 router.post('/', function(req, res) {
@@ -24,6 +68,9 @@ router.post('/', function(req, res) {
     var admin = req.body.admin;
     var del = req.body.del;
 
+    if(!req.body.id_steam){
+               id_steam = "";     
+    }
     if(!req.body.email || !req.body.password || !req.body.username)
     {
         res.json({ success: false, message: 'Veuillez remplir tout les champs.' });
