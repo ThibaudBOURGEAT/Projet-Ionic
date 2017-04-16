@@ -30,7 +30,7 @@ router.get('/getAccount', passport.authenticate('jwt', {session: false}), functi
 
  
 router.get('/getStatCSGO', passport.authenticate('jwt', {session: false}), function(req, res) {
-	var request = http.get("http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=75B7029F7E2BE1CDCD463FE803416AB3&steamid=76561197997737990" + req.user.id_steam,
+	var request = http.get("http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=75B7029F7E2BE1CDCD463FE803416AB3&steamid=" + req.user.id_steam,
 	 function(reponse){
 	
 		var body = "";	

@@ -10,7 +10,7 @@ router.get('/', passport.authenticate('jwt', {session: false}), function(req, re
 });
 
 router.get('/display', passport.authenticate('jwt', {session: false}), function(req, res) {
-    Pari.find({}).sort({id: -1}).limit(3).then(function(paris) {
+    Pari.find({}).sort({id: -1}).then(function(paris) {
 		res.json(paris);
     });
 });
@@ -19,12 +19,20 @@ router.post('/', passport.authenticate('jwt', {session: false}), function(req, r
 
     if(req.user.admin) {
         var teamname = req.body.teamname;
-        var winner = req.body.winner;
-        var score = req.body.score;
+        var winner = "";
+        var score = 0;
         var BO = req.body.BO;
+        var id = 1;
 
-        Pari.find({}).sort(-1).limit(1).then(function(paris){
-            if(paris[0].id){var id = paris[0].id + 1;}else{var id = 0;}
+        if(!req.body.teamname[0] || !req.body.teamname[1] || !req.body.BO){
+            return res.json({ message: 'Veuillez remplir tout les champs.' });
+        }
+        Pari.find({}).sort({id: -1}).limit(1).then(function(paris){
+            if(!paris[0]){
+                id = 1; 
+            }else{
+                id = paris[0].id + 1;
+            }
             var newPari = new Pari({
                 teamname: teamname,
                 winner: winner,
@@ -32,12 +40,12 @@ router.post('/', passport.authenticate('jwt', {session: false}), function(req, r
                 BO: BO,
                 id: id
             }).save().then(function(pariSaved) {
-                res.json(pariSaved);
+                return res.json({message: "Votre pari a bien été créé !", pariSaved});
             });
         });
 
     }else{
-        res.status(401).json({message: "Vous ne pouvez pas faire cela car vous n'êtes pas un admin."})
+        return res.status(401).json({message: "Vous ne pouvez pas faire cela car vous n'êtes pas un admin."})
     }
 });
 
